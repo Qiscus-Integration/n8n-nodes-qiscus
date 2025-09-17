@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-qiscus.omnichannelSendSystemEvent",
+	"node": "n8n-nodes-qiscus.omnichannel",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": [],
