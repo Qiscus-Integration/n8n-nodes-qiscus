@@ -1,6 +1,6 @@
 {
 	"name": "@qiscus-it/n8n-nodes-qiscus",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Qiscus n8n node",
 	"keywords": [
 		"n8n-community-node-package"
@@ -40,6 +40,8 @@
 		]
 	},
 	"devDependencies": {
+		"@types/lodash.merge": "^4.6.9",
+		"@types/lodash.set": "^4.3.9",
 		"@typescript-eslint/parser": "~8.32.0",
 		"eslint": "^8.57.0",
 		"eslint-plugin-n8n-nodes-base": "^1.16.3",
@@ -49,5 +51,9 @@
 	},
 	"peerDependencies": {
 		"n8n-workflow": "*"
+	},
+	"dependencies": {
+		"lodash.merge": "^4.6.2",
+		"lodash.set": "^4.3.2"
 	}
 }

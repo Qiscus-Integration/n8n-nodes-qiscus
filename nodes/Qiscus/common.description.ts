@@ -1,5 +1,5 @@
 import { INodeProperties } from 'n8n-workflow';
-import merge from 'lodash/merge';
+import merge from 'lodash.merge';
 
 const properties = {
 	roomId: {

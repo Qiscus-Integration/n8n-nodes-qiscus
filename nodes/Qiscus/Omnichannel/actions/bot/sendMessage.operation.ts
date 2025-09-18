@@ -4,7 +4,7 @@ import type {
 	INodeExecutionData,
 	INodeProperties,
 } from 'n8n-workflow';
-import set from 'lodash/set';
+import set from 'lodash.set';
 
 import { updateDisplayOptions, wrapData } from '../../utils';
 
