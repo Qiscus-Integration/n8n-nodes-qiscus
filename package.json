@@ -1,6 +1,6 @@
 {
 	"name": "@qiscus-it/n8n-nodes-qiscus",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Qiscus n8n node",
 	"keywords": [
 		"n8n-community-node-package"
@@ -36,7 +36,7 @@
 			"dist/credentials/QiscusCredentialsApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/Qiscus/Omnichannel.node.js"
+			"dist/nodes/Qiscus/Omnichannel/Omnichannel.node.js"
 		]
 	},
 	"devDependencies": {
