@@ -2,8 +2,9 @@ import type { INodeProperties } from 'n8n-workflow';
 
 import * as loginAdmin from './loginAdmin.operation';
 import * as getIdentityToken from './getIdentityToken.operation';
+import * as logout from './logout.operation';
 
-export { loginAdmin, getIdentityToken };
+export { loginAdmin, getIdentityToken, logout };
 
 export const description: INodeProperties[] = [
 	{
@@ -23,6 +24,11 @@ export const description: INodeProperties[] = [
 				value: 'loginAdmin',
 				action: 'Authenticate as admin',
 			},
+			{
+				name: 'Logout',
+				value: 'logout',
+				action: 'Logout',
+			},
 		],
 		displayOptions: {
 			show: {
@@ -34,4 +40,5 @@ export const description: INodeProperties[] = [
 
 	...loginAdmin.description,
 	...getIdentityToken.description,
+	...logout.description,
 ];
