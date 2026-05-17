@@ -17,12 +17,19 @@ import descriptions from '../../../common.description';
 enum MessageType {
 	Text = 'text',
 	FileAttachment = 'file_attachment',
+	Buttons = 'buttons',
 
 	// TODO: support other types
-	// Button = 'Button',
 	// Carousel = 'Carousel',
 	// QuickReply = 'QuickReply',
 	// Sticker = 'Sticker',
+}
+
+interface ButtonValue {
+	label: string;
+	type: 'postback' | 'link';
+	url: string;
+	method?: string;
 }
 
 const properties: INodeProperties[] = [
@@ -40,6 +47,10 @@ const properties: INodeProperties[] = [
 				name: 'Attachment',
 				value: MessageType.FileAttachment,
 			},
+			{
+				name: 'Buttons',
+				value: MessageType.Buttons,
+			},
 		],
 		default: 'text',
 	},
@@ -47,7 +58,7 @@ const properties: INodeProperties[] = [
 	descriptions('roomId', {
 		displayOptions: {
 			show: {
-				type: [MessageType.Text, MessageType.FileAttachment],
+				type: [MessageType.Text, MessageType.FileAttachment, MessageType.Buttons],
 			},
 		},
 	}),
@@ -55,7 +66,7 @@ const properties: INodeProperties[] = [
 	descriptions('message', {
 		displayOptions: {
 			show: {
-				type: [MessageType.Text, MessageType.FileAttachment],
+				type: [MessageType.Text, MessageType.FileAttachment, MessageType.Buttons],
 			},
 		},
 	}),
@@ -75,6 +86,83 @@ const properties: INodeProperties[] = [
 			},
 		},
 	}),
+
+	{
+		displayName: 'Body Text',
+		name: 'body_text',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'Text displayed above the buttons',
+		displayOptions: {
+			show: {
+				type: [MessageType.Buttons],
+			},
+		},
+	},
+
+	{
+		displayName: 'Buttons',
+		name: 'buttons',
+		type: 'fixedCollection',
+		typeOptions: { multipleValues: true },
+		default: {},
+		placeholder: 'Add Button',
+		displayOptions: {
+			show: {
+				type: [MessageType.Buttons],
+			},
+		},
+		options: [
+			{
+				name: 'button',
+				displayName: 'Button',
+				values: [
+					{
+						displayName: 'Label',
+						name: 'label',
+						type: 'string',
+						default: '',
+						required: true,
+						description: 'Button label shown to user',
+					},
+					{
+						displayName: 'Type',
+						name: 'type',
+						type: 'options',
+						options: [
+							{ name: 'Postback', value: 'postback' },
+							{ name: 'Link', value: 'link' },
+						],
+						default: 'postback',
+					},
+					{
+						displayName: 'URL',
+						name: 'url',
+						type: 'string',
+						default: '',
+						required: true,
+						description: 'Target URL (postback callback or link destination)',
+					},
+					{
+						displayName: 'Method',
+						name: 'method',
+						type: 'options',
+						options: [
+							{ name: 'GET', value: 'get' },
+							{ name: 'POST', value: 'post' },
+						],
+						default: 'get',
+						displayOptions: {
+							show: {
+								type: ['postback'],
+							},
+						},
+					},
+				],
+			},
+		],
+	},
 ];
 
 const displayOptions = {
@@ -114,6 +202,33 @@ export async function execute(
 
 		set(body, 'payload.url', attachment_url);
 		set(body, 'payload.caption', caption);
+	}
+
+	if (type === MessageType.Buttons) {
+		const body_text = this.getNodeParameter('body_text', i) as string;
+		const buttonsParam = this.getNodeParameter('buttons.button', i, []) as ButtonValue[];
+
+		const buttons = buttonsParam.map((b) => {
+			if (b.type === 'link') {
+				return {
+					label: b.label,
+					type: 'link',
+					payload: { url: b.url },
+				};
+			}
+			return {
+				label: b.label,
+				type: 'postback',
+				payload: {
+					url: b.url,
+					method: b.method ?? 'get',
+					payload: null,
+				},
+			};
+		});
+
+		set(body, 'payload.text', body_text);
+		set(body, 'payload.buttons', buttons);
 	}
 
 	responseData = await qiscusOmnichannelApiRequest.call(this, credentials, 'POST', path, body);
