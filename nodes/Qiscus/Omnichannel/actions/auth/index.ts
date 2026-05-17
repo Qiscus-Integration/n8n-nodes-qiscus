@@ -1,8 +1,9 @@
 import type { INodeProperties } from 'n8n-workflow';
 
 import * as loginAdmin from './loginAdmin.operation';
+import * as getIdentityToken from './getIdentityToken.operation';
 
-export { loginAdmin };
+export { loginAdmin, getIdentityToken };
 
 export const description: INodeProperties[] = [
 	{
@@ -12,6 +13,11 @@ export const description: INodeProperties[] = [
 		noDataExpression: true,
 		required: true,
 		options: [
+			{
+				name: 'Get Identity Token',
+				value: 'getIdentityToken',
+				action: 'Get identity token for SDK JWT auth',
+			},
 			{
 				name: 'Login Admin',
 				value: 'loginAdmin',
@@ -27,4 +33,5 @@ export const description: INodeProperties[] = [
 	},
 
 	...loginAdmin.description,
+	...getIdentityToken.description,
 ];

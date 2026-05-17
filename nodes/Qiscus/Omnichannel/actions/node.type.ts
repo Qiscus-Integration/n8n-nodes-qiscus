@@ -1,7 +1,7 @@
 import type { AllEntities } from 'n8n-workflow';
 
 type NodeMap = {
-	auth: 'loginAdmin';
+	auth: 'loginAdmin' | 'getIdentityToken';
 	bot: 'sendMessage' | 'setBotWebhook';
 	sdk: 'sendSystemEvent';
 };
