@@ -1,6 +1,7 @@
 /* eslint-disable n8n-nodes-base/node-filename-against-convention */
 import { NodeConnectionType, type INodeTypeDescription } from 'n8n-workflow';
 
+import * as auth from './auth';
 import * as bot from './bot';
 import * as sdk from './sdk';
 
@@ -33,6 +34,10 @@ export const description: INodeTypeDescription = {
 			required: true,
 			options: [
 				{
+					name: 'Auth',
+					value: 'auth',
+				},
+				{
 					name: 'Bot',
 					value: 'bot',
 				},
@@ -44,6 +49,7 @@ export const description: INodeTypeDescription = {
 			default: 'bot',
 		},
 
+		...auth.description,
 		...bot.description,
 		...sdk.description,
 	],

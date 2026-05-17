@@ -1,6 +1,7 @@
 import type { IExecuteFunctions, INodeExecutionData } from 'n8n-workflow';
 import { NodeOperationError } from 'n8n-workflow';
 
+import * as auth from './auth';
 import * as bot from './bot';
 import * as sdk from './sdk';
 import type { OmnichannelType } from './node.type';
@@ -23,6 +24,13 @@ export async function router(this: IExecuteFunctions): Promise<INodeExecutionDat
 	for (let i = 0; i < length; i++) {
 		try {
 			switch (omnichannelNodeData.resource) {
+				case 'auth':
+					executionData = await auth[omnichannelNodeData.operation].execute.call(
+						this,
+						i,
+						items[i],
+					);
+					break;
 				case 'bot':
 					executionData = await bot[omnichannelNodeData.operation].execute.call(this, i, items[i]);
 					break;
