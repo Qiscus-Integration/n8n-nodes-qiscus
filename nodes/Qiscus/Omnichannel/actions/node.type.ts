@@ -1,7 +1,7 @@
 import type { AllEntities } from 'n8n-workflow';
 
 type NodeMap = {
-	bot: 'sendMessage';
+	bot: 'sendMessage' | 'setBotWebhook';
 	sdk: 'sendSystemEvent';
 };
 

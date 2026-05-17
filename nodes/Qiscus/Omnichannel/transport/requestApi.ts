@@ -50,6 +50,43 @@ export async function qiscusOmnichannelApiRequest(
 	return await this.helpers.requestWithAuthentication.call(this, 'qiscusCredentialsApi', options);
 }
 
+export async function qiscusOmnichannelAdminApiRequest(
+	this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions,
+	credentials: QiscusCredentials,
+	adminToken: string,
+	method: IHttpRequestMethods,
+	path: string,
+	body: IDataObject = {},
+	query: IDataObject = {},
+	option: IDataObject = {},
+) {
+	let options: IHttpRequestOptions = {
+		method,
+		qs: query,
+		url: `${credentials.baseUrl}/${path}`,
+		body,
+		json: true,
+		headers: {
+			Authorization: adminToken,
+			'Qiscus-App-Id': credentials.appId,
+		},
+	};
+
+	if (Object.keys(option).length !== 0) {
+		options = Object.assign({}, options, option);
+	}
+
+	if (Object.keys(body).length === 0) {
+		delete options.body;
+	}
+
+	if (Object.keys(query).length === 0) {
+		delete options.qs;
+	}
+
+	return await this.helpers.requestWithAuthentication.call(this, 'qiscusCredentialsApi', options);
+}
+
 export async function qiscusSDKApiRequest(
 	this: IHookFunctions | IExecuteFunctions | ILoadOptionsFunctions,
 	credentials: QiscusCredentials,
