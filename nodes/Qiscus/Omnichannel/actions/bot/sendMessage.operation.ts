@@ -19,10 +19,15 @@ enum MessageType {
 	FileAttachment = 'file_attachment',
 	Buttons = 'buttons',
 	Carousel = 'carousel',
+	QuickReply = 'quickreply',
 
 	// TODO: support other types
-	// QuickReply = 'QuickReply',
 	// Sticker = 'Sticker',
+}
+
+interface QuickReplyValue {
+	label: string;
+	data: string;
 }
 
 interface ButtonValue {
@@ -89,6 +94,10 @@ const properties: INodeProperties[] = [
 				name: 'Carousel',
 				value: MessageType.Carousel,
 			},
+			{
+				name: 'Quick Reply',
+				value: MessageType.QuickReply,
+			},
 		],
 		default: 'text',
 	},
@@ -101,6 +110,7 @@ const properties: INodeProperties[] = [
 					MessageType.FileAttachment,
 					MessageType.Buttons,
 					MessageType.Carousel,
+					MessageType.QuickReply,
 				],
 			},
 		},
@@ -114,6 +124,7 @@ const properties: INodeProperties[] = [
 					MessageType.FileAttachment,
 					MessageType.Buttons,
 					MessageType.Carousel,
+					MessageType.QuickReply,
 				],
 			},
 		},
@@ -351,6 +362,44 @@ const properties: INodeProperties[] = [
 			},
 		],
 	},
+
+	{
+		displayName: 'Quick Replies',
+		name: 'quick_replies',
+		type: 'fixedCollection',
+		typeOptions: { multipleValues: true },
+		default: {},
+		placeholder: 'Add Quick Reply',
+		displayOptions: {
+			show: {
+				type: [MessageType.QuickReply],
+			},
+		},
+		options: [
+			{
+				name: 'reply',
+				displayName: 'Reply',
+				values: [
+					{
+						displayName: 'Label',
+						name: 'label',
+						type: 'string',
+						default: '',
+						required: true,
+						description: 'Reply label shown to user',
+					},
+					{
+						displayName: 'Data',
+						name: 'data',
+						type: 'string',
+						default: '',
+						required: true,
+						description: 'Postback payload data sent when tapped',
+					},
+				],
+			},
+		],
+	},
 ];
 
 const displayOptions = {
@@ -398,6 +447,29 @@ export async function execute(
 
 		set(body, 'payload.text', body_text);
 		set(body, 'payload.buttons', buttonsParam.map(buildButtonPayload));
+	}
+
+	if (type === MessageType.QuickReply) {
+		const repliesParam = this.getNodeParameter(
+			'quick_replies.reply',
+			i,
+			[],
+		) as QuickReplyValue[];
+
+		body.type = 'custom';
+		set(body, 'payload.type', 'quickreply');
+		set(
+			body,
+			'payload.content',
+			repliesParam.map((r) => ({
+				type: 'action',
+				action: {
+					type: 'postback',
+					label: r.label,
+					data: r.data,
+				},
+			})),
+		);
 	}
 
 	if (type === MessageType.Carousel) {
