@@ -112,8 +112,8 @@ export async function execute(
 		const attachment_url = this.getNodeParameter('attachment_url', i) as string;
 		const caption = this.getNodeParameter('caption', i) as string;
 
-		set(body, 'attachment_url', attachment_url);
-		set(body, 'caption', caption);
+		set(body, 'payload.url', attachment_url);
+		set(body, 'payload.caption', caption);
 	}
 
 	responseData = await qiscusOmnichannelApiRequest.call(this, credentials, 'POST', path, body);
