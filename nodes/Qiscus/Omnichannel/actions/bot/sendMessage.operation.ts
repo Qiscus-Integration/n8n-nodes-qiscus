@@ -20,9 +20,7 @@ enum MessageType {
 	Buttons = 'buttons',
 	Carousel = 'carousel',
 	QuickReply = 'quickreply',
-
-	// TODO: support other types
-	// Sticker = 'Sticker',
+	Sticker = 'sticker',
 }
 
 interface QuickReplyValue {
@@ -98,6 +96,10 @@ const properties: INodeProperties[] = [
 				name: 'Quick Reply',
 				value: MessageType.QuickReply,
 			},
+			{
+				name: 'Sticker',
+				value: MessageType.Sticker,
+			},
 		],
 		default: 'text',
 	},
@@ -111,6 +113,7 @@ const properties: INodeProperties[] = [
 					MessageType.Buttons,
 					MessageType.Carousel,
 					MessageType.QuickReply,
+					MessageType.Sticker,
 				],
 			},
 		},
@@ -400,6 +403,45 @@ const properties: INodeProperties[] = [
 			},
 		],
 	},
+
+	{
+		displayName: 'Sticker Format',
+		name: 'sticker_format',
+		type: 'options',
+		options: [
+			{
+				name: 'Text Markup',
+				value: 'text_markup',
+				description: 'Not available at instagram and tiktok channel',
+			},
+			{
+				name: 'Native Sticker',
+				value: 'native',
+				description: 'Only available at WhatsApp channel',
+			},
+		],
+		default: 'native',
+		displayOptions: {
+			show: {
+				type: [MessageType.Sticker],
+			},
+		},
+	},
+
+	{
+		displayName: 'Sticker URL',
+		name: 'sticker_url',
+		type: 'string',
+		default: '',
+		required: true,
+		description: 'URL of the sticker image (typically .webp)',
+		hint: 'Enter a URL',
+		displayOptions: {
+			show: {
+				type: [MessageType.Sticker],
+			},
+		},
+	},
 ];
 
 const displayOptions = {
@@ -423,15 +465,17 @@ export async function execute(
 	const type = this.getNodeParameter('type', i) as string;
 
 	const room_id = this.getNodeParameter('roomId', i) as string;
-	const message = this.getNodeParameter('message', i) as string;
 
 	const path = `${credentials.appId}/bot`;
 	const body: IDataObject = {
 		type,
 		sender_email: `${credentials.appId}_admin@qismo.com`,
 		room_id,
-		message,
 	};
+
+	if (type !== MessageType.Sticker) {
+		body.message = this.getNodeParameter('message', i) as string;
+	}
 
 	if (type === MessageType.FileAttachment) {
 		const attachment_url = this.getNodeParameter('attachment_url', i) as string;
@@ -447,6 +491,18 @@ export async function execute(
 
 		set(body, 'payload.text', body_text);
 		set(body, 'payload.buttons', buttonsParam.map(buildButtonPayload));
+	}
+
+	if (type === MessageType.Sticker) {
+		const sticker_url = this.getNodeParameter('sticker_url', i) as string;
+		const sticker_format = this.getNodeParameter('sticker_format', i) as string;
+
+		if (sticker_format === 'text_markup') {
+			body.type = 'text';
+			body.message = `[sticker] ${sticker_url} [/sticker]`;
+		} else {
+			set(body, 'payload.url', sticker_url);
+		}
 	}
 
 	if (type === MessageType.QuickReply) {
