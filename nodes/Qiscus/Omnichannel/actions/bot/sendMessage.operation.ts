@@ -18,9 +18,9 @@ enum MessageType {
 	Text = 'text',
 	FileAttachment = 'file_attachment',
 	Buttons = 'buttons',
+	Carousel = 'carousel',
 
 	// TODO: support other types
-	// Carousel = 'Carousel',
 	// QuickReply = 'QuickReply',
 	// Sticker = 'Sticker',
 }
@@ -30,6 +30,40 @@ interface ButtonValue {
 	type: 'postback' | 'link';
 	url: string;
 	method?: string;
+	postback_text?: string;
+}
+
+interface CardValue {
+	image: string;
+	title: string;
+	description: string;
+	default_action_url: string;
+	default_action_method?: string;
+	default_action_postback_text?: string;
+	buttons?: { button?: ButtonValue[] };
+}
+
+function buildButtonPayload(b: ButtonValue) {
+	if (b.type === 'link') {
+		return {
+			label: b.label,
+			type: 'link',
+			payload: { url: b.url },
+		};
+	}
+	const out: IDataObject = {
+		label: b.label,
+		type: 'postback',
+		payload: {
+			url: b.url,
+			method: b.method ?? 'get',
+			payload: null,
+		},
+	};
+	if (b.postback_text) {
+		out.postback_text = b.postback_text;
+	}
+	return out;
 }
 
 const properties: INodeProperties[] = [
@@ -51,6 +85,10 @@ const properties: INodeProperties[] = [
 				name: 'Buttons',
 				value: MessageType.Buttons,
 			},
+			{
+				name: 'Carousel',
+				value: MessageType.Carousel,
+			},
 		],
 		default: 'text',
 	},
@@ -58,7 +96,12 @@ const properties: INodeProperties[] = [
 	descriptions('roomId', {
 		displayOptions: {
 			show: {
-				type: [MessageType.Text, MessageType.FileAttachment, MessageType.Buttons],
+				type: [
+					MessageType.Text,
+					MessageType.FileAttachment,
+					MessageType.Buttons,
+					MessageType.Carousel,
+				],
 			},
 		},
 	}),
@@ -66,7 +109,12 @@ const properties: INodeProperties[] = [
 	descriptions('message', {
 		displayOptions: {
 			show: {
-				type: [MessageType.Text, MessageType.FileAttachment, MessageType.Buttons],
+				type: [
+					MessageType.Text,
+					MessageType.FileAttachment,
+					MessageType.Buttons,
+					MessageType.Carousel,
+				],
 			},
 		},
 	}),
@@ -163,6 +211,146 @@ const properties: INodeProperties[] = [
 			},
 		],
 	},
+
+	{
+		displayName: 'Cards',
+		name: 'cards',
+		type: 'fixedCollection',
+		typeOptions: { multipleValues: true },
+		default: {},
+		placeholder: 'Add Card',
+		displayOptions: {
+			show: {
+				type: [MessageType.Carousel],
+			},
+		},
+		options: [
+			{
+				name: 'card',
+				displayName: 'Card',
+				values: [
+					{
+						displayName: 'Buttons',
+						name: 'buttons',
+						type: 'fixedCollection',
+						typeOptions: { multipleValues: true },
+						default: {},
+						placeholder: 'Add Button',
+						options: [
+							{
+								name: 'button',
+								displayName: 'Button',
+								values: [
+									{
+										displayName: 'Label',
+										name: 'label',
+										type: 'string',
+										default: '',
+										required: true,
+									},
+									{
+										displayName: 'Method',
+										name: 'method',
+										type: 'options',
+										options: [
+											{ name: 'GET', value: 'get' },
+											{ name: 'POST', value: 'post' },
+										],
+										default: 'get',
+										displayOptions: {
+											show: {
+												type: ['postback'],
+											},
+										},
+									},
+									{
+										displayName: 'Postback Text',
+										name: 'postback_text',
+										type: 'string',
+										default: '',
+										displayOptions: {
+											show: {
+												type: ['postback'],
+											},
+										},
+									},
+									{
+										displayName: 'Type',
+										name: 'type',
+										type: 'options',
+										options: [
+											{ name: 'Postback', value: 'postback' },
+											{ name: 'Link', value: 'link' },
+										],
+										default: 'postback',
+									},
+									{
+										displayName: 'URL',
+										name: 'url',
+										type: 'string',
+										default: '',
+										required: true,
+									},
+								],
+							},
+						],
+					},
+					{
+						displayName: 'Default Action Method',
+						name: 'default_action_method',
+						type: 'options',
+						options: [
+							{
+								name: 'GET',
+								value: 'get',
+							},
+							{
+								name: 'POST',
+								value: 'post',
+							},
+					],
+						default: 'get',
+					},
+					{
+						displayName: 'Default Action Postback Text',
+						name: 'default_action_postback_text',
+						type: 'string',
+						default: '',
+						description: 'Text shown as user reply on tap',
+					},
+					{
+						displayName: 'Default Action URL',
+						name: 'default_action_url',
+						type: 'string',
+						default: '',
+							required:	true,
+						description: 'Postback URL triggered when card tapped',
+					},
+					{
+						displayName: 'Description',
+						name: 'description',
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Image URL',
+						name: 'image',
+						type: 'string',
+						default: '',
+							required:	true,
+						description: 'Card image URL',
+					},
+					{
+						displayName: 'Title',
+						name: 'title',
+						type: 'string',
+						default: '',
+							required:	true,
+					},
+			],
+			},
+		],
+	},
 ];
 
 const displayOptions = {
@@ -208,27 +396,33 @@ export async function execute(
 		const body_text = this.getNodeParameter('body_text', i) as string;
 		const buttonsParam = this.getNodeParameter('buttons.button', i, []) as ButtonValue[];
 
-		const buttons = buttonsParam.map((b) => {
-			if (b.type === 'link') {
-				return {
-					label: b.label,
-					type: 'link',
-					payload: { url: b.url },
-				};
-			}
+		set(body, 'payload.text', body_text);
+		set(body, 'payload.buttons', buttonsParam.map(buildButtonPayload));
+	}
+
+	if (type === MessageType.Carousel) {
+		const cardsParam = this.getNodeParameter('cards.card', i, []) as CardValue[];
+
+		const cards = cardsParam.map((c) => {
+			const cardButtons = c.buttons?.button ?? [];
 			return {
-				label: b.label,
-				type: 'postback',
-				payload: {
-					url: b.url,
-					method: b.method ?? 'get',
-					payload: null,
+				image: c.image,
+				title: c.title,
+				description: c.description,
+				default_action: {
+					type: 'postback',
+					postback_text: c.default_action_postback_text ?? '',
+					payload: {
+						url: c.default_action_url,
+						method: c.default_action_method ?? 'get',
+						payload: null,
+					},
 				},
+				buttons: cardButtons.map(buildButtonPayload),
 			};
 		});
 
-		set(body, 'payload.text', body_text);
-		set(body, 'payload.buttons', buttons);
+		set(body, 'payload.cards', cards);
 	}
 
 	responseData = await qiscusOmnichannelApiRequest.call(this, credentials, 'POST', path, body);
