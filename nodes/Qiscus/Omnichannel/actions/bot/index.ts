@@ -1,8 +1,9 @@
 import type { INodeProperties } from 'n8n-workflow';
 
 import * as sendMessage from './sendMessage.operation';
+import * as setBotWebhook from './setBotWebhook.operation';
 
-export { sendMessage };
+export { sendMessage, setBotWebhook };
 
 export const description: INodeProperties[] = [
 	{
@@ -17,6 +18,11 @@ export const description: INodeProperties[] = [
 				value: 'sendMessage',
 				action: 'Send a message',
 			},
+			{
+				name: 'Set Bot Webhook',
+				value: 'setBotWebhook',
+				action: 'Set bot webhook',
+			},
 		],
 		displayOptions: {
 			show: {
@@ -27,4 +33,5 @@ export const description: INodeProperties[] = [
 	},
 
 	...sendMessage.description,
+	...setBotWebhook.description,
 ];
