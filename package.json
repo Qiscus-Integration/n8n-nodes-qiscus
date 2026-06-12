@@ -1,6 +1,6 @@
 {
 	"name": "@qiscus-it/n8n-nodes-qiscus",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "Qiscus n8n node",
 	"keywords": [
 		"n8n-community-node-package"
