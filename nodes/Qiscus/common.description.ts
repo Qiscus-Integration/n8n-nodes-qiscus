@@ -39,6 +39,17 @@ const properties = {
 		required: true,
 		description: 'The caption to send',
 	},
+
+	adminToken: {
+		displayName: 'Admin Token',
+		name: 'adminToken',
+		type: 'string',
+		typeOptions: { password: true },
+		default: '',
+		required: true,
+		description: 'Admin long-lived token from Login Admin endpoint',
+		hint: 'Tip: pipe from a Login Admin node via expression',
+	},
 };
 
 const descriptions = (
