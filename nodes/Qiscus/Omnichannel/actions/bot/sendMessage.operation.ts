@@ -405,22 +405,22 @@ const properties: INodeProperties[] = [
 	},
 
 	{
-		displayName: 'Sticker Format',
-		name: 'sticker_format',
+		displayName: 'Sticker Version',
+		name: 'sticker_version',
 		type: 'options',
 		options: [
 			{
-				name: 'Text Markup',
-				value: 'text_markup',
+				name: 'V1',
+				value: 'v1',
 				description: 'Not available at instagram and tiktok channel',
 			},
 			{
-				name: 'Native Sticker',
-				value: 'native',
+				name: 'V2',
+				value: 'v2',
 				description: 'Only available at WhatsApp channel',
 			},
 		],
-		default: 'native',
+		default: 'v2',
 		displayOptions: {
 			show: {
 				type: [MessageType.Sticker],
@@ -495,9 +495,9 @@ export async function execute(
 
 	if (type === MessageType.Sticker) {
 		const sticker_url = this.getNodeParameter('sticker_url', i) as string;
-		const sticker_format = this.getNodeParameter('sticker_format', i) as string;
+		const sticker_version = this.getNodeParameter('sticker_version', i) as string;
 
-		if (sticker_format === 'text_markup') {
+		if (sticker_version === 'v1') {
 			body.type = 'text';
 			body.message = `[sticker] ${sticker_url} [/sticker]`;
 		} else {
